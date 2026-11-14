@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Family Daily Timetable</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap">
+<style>
+:root{--bg:#e8f5f2;--card:#ffffff;--ink:#16324a;--mute:#5b7388;--line:#cfe3de;--accent:#ff6b5e;--sun:#ffc93c;--ok:#1f9d74;--today:#fff4cc;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1f2b;--card:#172b3a;--ink:#eaf4f8;--mute:#9bb3c3;--line:#294456;--accent:#ff8277;--sun:#ffd25e;--ok:#4cd2a2;--today:#3a3420;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1f2b;--card:#172b3a;--ink:#eaf4f8;--mute:#9bb3c3;--line:#294456;--accent:#ff8277;--sun:#ffd25e;--ok:#4cd2a2;--today:#3a3420;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Baloo 2","Trebuchet MS",system-ui,sans-serif;font-size:17px;line-height:1.35}
+main{max-width:860px;margin:0 auto;padding:18px 14px 40px}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between;margin-bottom:14px}
+h1{margin:0;font-size:clamp(26px,6vw,40px);font-weight:800;line-height:1.1}
+.who{display:flex;align-items:center;gap:8px;color:var(--mute);font-weight:500}
+.who input{font:inherit;font-weight:700;color:var(--ink);background:transparent;border:0;border-bottom:3px dashed var(--sun);width:11ch;padding:2px 4px}
+.tabs{display:flex;gap:8px;margin-bottom:14px}
+.tab{flex:1;min-width:0;font:inherit;font-weight:700;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:16px;padding:8px 6px;display:flex;flex-direction:column;align-items:center;line-height:1.15;cursor:pointer;overflow:hidden}
+.tab span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tab small{font-weight:500;color:var(--mute);font-size:13px}
+.tab[aria-selected="true"]{background:var(--sun);border-color:var(--sun);color:#3d2a00}
+.tab[aria-selected="true"] small{color:#5a4000}
+.tab:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.today{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:14px 16px;margin-bottom:14px}
+.today b{font-size:20px}
+.bar{height:16px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;width:0;background:var(--ok);border-radius:99px;transition:width .35s}
+.msg{margin-top:6px;color:var(--mute);font-weight:500}
+.wrap{overflow-x:auto;background:var(--card);border:2px solid var(--line);border-radius:20px}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th,td{padding:6px 4px;text-align:center;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:0}
+th{font-weight:700;font-size:15px;color:var(--mute);padding-top:10px}
+th.t,td.t{text-align:left;padding-left:12px;min-width:210px}
+.cell.now,th.now{background:var(--today)}
+th.now{color:var(--ink)}
+.task{display:flex;align-items:center;gap:8px}
+.task span.e{font-size:26px}
+.task input{font:inherit;color:var(--ink);background:transparent;border:0;width:100%;padding:2px 0;font-weight:700;min-width:0}
+.task input.tm{font-weight:500;color:var(--mute);font-size:14px}
+.task input:focus-visible{outline:2px solid var(--sun);border-radius:6px}
+.tcol{display:flex;flex-direction:column;min-width:0;flex:1}
+button{font:inherit;cursor:pointer}
+.tick{width:44px;height:44px;border-radius:14px;border:2px solid var(--line);background:transparent;color:transparent;font-size:24px;line-height:1}
+.tick[aria-pressed="true"]{background:var(--sun);border-color:var(--sun);color:#7a4b00}
+.tick:focus-visible,.btn:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.del{border:0;background:transparent;color:var(--accent);font-size:20px;display:none}
+.edit .del{display:inline-block}
+.tools{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;align-items:center;justify-content:space-between}
+.btn{border:2px solid var(--ink);background:transparent;color:var(--ink);padding:8px 16px;border-radius:99px;font-weight:700}
+.btn.p{background:var(--ink);color:var(--bg)}
+.week{color:var(--mute);font-weight:500}
+.sum{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:14px 16px;margin-top:18px}
+.sum h2{margin:0 0 8px;font-size:22px}
+.sum textarea{width:100%;min-height:360px;font:inherit;font-size:15px;color:var(--ink);background:transparent;border:2px solid var(--line);border-radius:12px;padding:10px;resize:vertical}
+.sum a.btn{text-decoration:none;display:inline-block}
+.pin{display:none;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap}
+.pin.show{display:flex}
+.pin input{font:inherit;width:9ch;padding:6px 10px;border:2px solid var(--line);border-radius:99px;background:transparent;color:var(--ink)}
+.pin small{color:var(--mute)}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+@media print{.tools,.del,.pin{display:none}body{background:#fff}}
+</style>
+</head>
+<body>
+<main id="app">
+<header>
+  <h1>Family Daily Timetable</h1>
+  <label class="who">Name: <input id="name" maxlength="20" placeholder="Type here"></label>
+</header>
+<div class="tabs" id="tabs" role="tablist" aria-label="Choose a child"></div>
+<section class="today" aria-live="polite">
+  <b id="tt">Today</b>
+  <div class="bar"><i id="pb"></i></div>
+  <div class="msg" id="pm"></div>
+</section>
+<div class="wrap"><table id="tbl"></table></div>
+<div class="tools">
+  <span class="week" id="wk"></span>
+  <span>
+    <button class="btn" id="edit">Edit tasks</button>
+    <button class="btn" id="add" hidden>Add task</button>
+    <button class="btn p" id="reset">Start new week</button>
+  </span>
+</div>
+<div class="pin" id="pin"><span id="pinlbl"></span><input id="pinin" type="password" inputmode="numeric" maxlength="6" aria-label="Parent PIN"><button class="btn" id="pinok">OK</button><small id="pinmsg"></small></div>
+<section class="sum" aria-labelledby="sh">
+<h2 id="sh">Summary for parents</h2>
+<textarea id="sumtxt" readonly aria-label="Summary of tasks done and pending"></textarea>
+<div class="tools"><span><button class="btn p" id="copy">Copy summary</button> <a class="btn" id="wa" href="#" target="_blank" rel="noopener">Send to WhatsApp</a></span><span class="week" id="cm" aria-live="polite"></span></div>
+</section>
+</main>
+<script>
+(function(){
+var KEY="kids-timetable-v2",OLD="kids-timetable-v1";
+var D=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],FD=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+function tasks(){return [
+{id:1,e:"🛏️",t:"Make the bed",time:"7:00"},
+{id:2,e:"🚿",t:"Shower",time:"7:15"},
+{id:3,e:"🍳",t:"Breakfast",time:"7:45"},
+{id:4,e:"📺",t:"Morning TV break",time:"8:15"},
+{id:5,e:"🧹",t:"Sweep and clean the house",time:"9:00"},
+{id:6,e:"🗑️",t:"Empty the rubbish",time:"9:30"}]}
+function kid(i){return {id:i,name:"",tasks:tasks(),done:{},next:7}}
+function load(){
+  try{
+    var r=localStorage.getItem(KEY);
+    if(r){var o=JSON.parse(r);if(o&&o.kids&&o.kids.length)return o}
+    var q=localStorage.getItem(OLD);
+    if(q){var p=JSON.parse(q);if(p&&p.tasks)return {kids:[{id:0,name:p.name||"",tasks:p.tasks,done:p.done||{},next:p.next||7},kid(1),kid(2)],cur:0,pin:p.pin||""}}
+  }catch(e){}
+  return {kids:[kid(0),kid(1),kid(2)],cur:0,pin:""}
+}
+var S=load(),editing=false,unlocked=false,pm="",now=(new Date().getDay()+6)%7;
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function K(){return S.kids[S.cur]}
+function nm(k,i){return k.name||"Child "+(i+1)}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;")}
+function render(){
+  var k=K(),h="<tr><th class='t'>Things to do</th>";
+  D.forEach(function(d,i){h+="<th"+(i===now?" class='now'":"")+">"+d+"</th>"});
+  h+="</tr>";
+  k.tasks.forEach(function(x){
+    h+="<tr><td class='t'><div class='task'><span class='e'>"+x.e+"</span><div class='tcol'>"+
+    "<input data-id='"+x.id+"' data-f='t' value=\""+esc(x.t)+"\" aria-label='Task name'>"+
+    "<input class='tm' data-id='"+x.id+"' data-f='time' value=\""+esc(x.time)+"\" aria-label='Time'></div>"+
+    "<button class='del' data-del='"+x.id+"' aria-label='Remove task'>✕</button></div></td>";
+    for(var i=0;i<7;i++){
+      var on=!!k.done[x.id+":"+i];
+      h+="<td class='cell"+(i===now?" now":"")+"'><button class='tick' data-id='"+x.id+"' data-d='"+i+"' aria-pressed='"+on+"' aria-label='"+esc(x.t)+", "+D[i]+"'>★</button></td>";
+    }
+    h+="</tr>";
+  });
+  document.getElementById("tbl").innerHTML=h;
+  document.getElementById("name").value=k.name||"";
+  document.getElementById("app").classList.toggle("edit",editing);
+  document.getElementById("add").hidden=!editing;
+  document.getElementById("edit").textContent=editing?"Done editing":"Edit tasks";
+  progress();
+}
+function tabs(){
+  var h="";
+  S.kids.forEach(function(k,i){
+    var t=0;k.tasks.forEach(function(x){if(k.done[x.id+":"+now])t++});
+    h+="<button class='tab' role='tab' aria-selected='"+(i===S.cur)+"' data-k='"+i+"'><span>"+esc(nm(k,i))+"</span><small>"+t+"/"+k.tasks.length+" today</small></button>";
+  });
+  document.getElementById("tabs").innerHTML=h;
+}
+function progress(){
+  var k=K(),n=k.tasks.length,t=0,w=0;
+  k.tasks.forEach(function(x){for(var i=0;i<7;i++)if(k.done[x.id+":"+i]){w++;if(i===now)t++}});
+  document.getElementById("pb").style.width=(n?Math.round(t/n*100):0)+"%";
+  var m=k.name?k.name+", ":"";
+  document.getElementById("tt").textContent="Today: "+t+" of "+n+" done";
+  document.getElementById("pm").textContent=!n?"Add a task to get started.":t===n?"Amazing, "+m+"all done today! ⭐":t===0?m+"tap a star when you finish a task.":"Keep going, "+m+"you’re doing great!";
+  document.getElementById("wk").textContent="Stars this week: "+w+" / "+(n*7);
+  tabs();summary();
+}
+function summary(){
+  var L=["Daily timetable - "+FD[now],""];
+  [K()].forEach(function(k){var i=S.cur;
+    var n=k.tasks.length,td=[],tp=[],w=0,ms=[];
+    k.tasks.forEach(function(x){
+      (k.done[x.id+":"+now]?td:tp).push(x.t);
+      var d,m=0;
+      for(d=0;d<7;d++)if(k.done[x.id+":"+d])w++;
+      for(d=0;d<now;d++)if(!k.done[x.id+":"+d])m++;
+      if(m)ms.push(x.t+" ("+m+")");
+    });
+    L.push("*"+nm(k,i)+"* - today "+td.length+"/"+n+", week "+w+"/"+(n*7));
+    td.forEach(function(t){L.push("✅ Done: "+t)});
+    tp.forEach(function(t){L.push("⬜ Pending: "+t)});
+    if(ms.length)L.push("Missed earlier this week: "+ms.join(", "));
+    L.push("");
+  });
+  var tx=L.join("\n").replace(/\s+$/,"");
+  document.getElementById("sumtxt").value=tx;
+  document.getElementById("wa").href="https://wa.me/?text="+encodeURIComponent(tx);
+}
+document.getElementById("copy").onclick=function(){
+  var t=document.getElementById("sumtxt"),m=document.getElementById("cm");
+  function ok(){m.textContent="Copied!"}
+  function fb(){t.select();try{document.execCommand("copy")?ok():m.textContent="Select the text and copy it."}catch(e){m.textContent="Select the text and copy it."}}
+  try{navigator.clipboard.writeText(t.value).then(ok,fb)}catch(e){fb()}
+};
+function pinUI(mode){
+  pm=mode;document.getElementById("pin").classList.toggle("show",!!mode);
+  document.getElementById("pinin").value="";document.getElementById("pinmsg").textContent="";
+  document.getElementById("pinlbl").textContent=mode==="unlock"?"Parent PIN to edit:":mode==="set"?"Set parent PIN (empty = no PIN):":"";
+}
+document.getElementById("pinok").onclick=function(){
+  var v=document.getElementById("pinin").value,m=document.getElementById("pinmsg");
+  if(pm==="unlock"){if(v===S.pin){unlocked=true;editing=true;pinUI("set");render()}else m.textContent="Wrong PIN"}
+  else if(pm==="set"){S.pin=v;unlocked=true;save();m.textContent=v?"PIN saved":"PIN removed"}
+};
+document.getElementById("tabs").addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;
+  S.cur=+b.dataset.k;save();render();
+});
+document.getElementById("tbl").addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;
+  var k=K();
+  if(b.dataset.del){k.tasks=k.tasks.filter(function(x){return x.id!=b.dataset.del});save();render();return}
+  if(b.classList.contains("tick")){
+    var key=b.dataset.id+":"+b.dataset.d;
+    if(k.done[key])delete k.done[key];else k.done[key]=true;
+    save();b.setAttribute("aria-pressed",!!k.done[key]);progress();
+  }
+});
+document.getElementById("tbl").addEventListener("input",function(e){
+  var i=e.target;if(!i.dataset.f)return;
+  K().tasks.forEach(function(x){if(x.id==i.dataset.id)x[i.dataset.f]=i.value});save();
+});
+document.getElementById("name").addEventListener("input",function(e){K().name=e.target.value;save();progress()});
+document.getElementById("edit").onclick=function(){
+  if(editing){editing=false;unlocked=false;pinUI("");render();return}
+  if(S.pin&&!unlocked){pinUI("unlock");return}
+  editing=true;pinUI("set");render();
+};
+document.getElementById("add").onclick=function(){var k=K();k.tasks.push({id:k.next++,e:"⭐",t:"New task",time:""});save();render()};
+var rt;
+document.getElementById("reset").onclick=function(){
+  var b=this;
+  if(b.dataset.s){S.kids.forEach(function(k){k.done={}});save();render();b.textContent="Start new week";delete b.dataset.s;clearTimeout(rt)}
+  else{b.dataset.s=1;b.textContent="Tap again to clear all stars (all kids)";rt=setTimeout(function(){b.textContent="Start new week";delete b.dataset.s},4000)}
+};
+render();
+})();
+</script>
+</body>
+</html>
